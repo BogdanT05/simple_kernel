@@ -14,6 +14,8 @@ MemoryAllocator::MemoryAllocator() {
 }
 
 void * MemoryAllocator::allocate(size_t size) {
+    if (size <= 0) return nullptr;
+
     size += sizeof(FreeBlock);
     size_t blockNeeded = (size + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE;
 
