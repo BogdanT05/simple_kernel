@@ -1,0 +1,9 @@
+#ifndef PROJECT_SYSCALLCODES_HPP
+#define PROJECT_SYSCALLCODES_HPP
+
+enum SyscallCodes {
+    MEM_ALLOC = 0x01,
+    MEM_FREE = 0x02
+};
+
+#endif //PROJECT_SYSCALLCODES_HPP
