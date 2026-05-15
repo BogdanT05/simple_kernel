@@ -52,6 +52,7 @@ void * MemoryAllocator::allocate(size_t size) {
 
 int MemoryAllocator::tryToJoin(FreeBlock *block) {
     if (block == nullptr) return 0;
+    // Ako sledeci slobodan blok pocinje gde se ovaj zavrsava znaci moze da se spoji
     if (block->next != nullptr &&
         (uint8*)block + block->blockSize*MEM_BLOCK_SIZE == (uint8*)block->next) {
 
@@ -65,6 +66,7 @@ int MemoryAllocator::tryToJoin(FreeBlock *block) {
 
 int MemoryAllocator::free(void *block) {
     if (block == nullptr) return 0;
+    // block pokazuje na memoriju koju korisnik moze da koristi, zaglavlje je pre
     auto* newBlock = (FreeBlock*)((uint8*) block - sizeof(FreeBlock));
 
     if ((void*)newBlock >= HEAP_END_ADDR ||
@@ -73,12 +75,15 @@ int MemoryAllocator::free(void *block) {
     }
 
     FreeBlock *current;
+    // Ako treba pre headera
     if (headFree == nullptr || (uint8*)newBlock < (uint8*)headFree)
         current = nullptr;
     else
+        // Odzavamo uredjenost liste, trazimo izmedju koja dva slobodna bloka se nalazi zauzeti
         for (current = headFree; current->next != nullptr && (uint8*)newBlock > (uint8*)current->next;
             current = current->next){}
 
+    // Provera da li se radi dvostruki free
     if (current != nullptr && (newBlock == current || newBlock == current->next))
         return -1;
 
