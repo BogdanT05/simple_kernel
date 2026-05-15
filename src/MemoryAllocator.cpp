@@ -14,25 +14,24 @@ MemoryAllocator::MemoryAllocator() {
 }
 
 void * MemoryAllocator::allocate(size_t size) {
-    if (size <= 0) return nullptr;
-
-    size += sizeof(FreeBlock);
-    size_t blockNeeded = (size + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE;
+    if (size == 0) return nullptr;
+    size_t headerBlocks = (sizeof(FreeBlock) + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE;
+    size += headerBlocks;
 
     FreeBlock * block = headFree;
     FreeBlock * prev = nullptr;
 
     // First fit
     for (; block != nullptr; prev = block, block = block->next)
-        if (block->blockSize >= blockNeeded) break;
+        if (block->blockSize >= size) break;
 
     if (block == nullptr) return nullptr;
-    size_t remainingBlockSize = block->blockSize - blockNeeded;
+    size_t remainingBlockSize = block->blockSize - size;
 
     // Ako moze da se smesti header i bar jedan blok za podatke
-    if (remainingBlockSize > (sizeof(FreeBlock) + MEM_BLOCK_SIZE -1) / MEM_BLOCK_SIZE + 1) {
-        block->blockSize = blockNeeded;
-        auto * newBlock = (FreeBlock*)((uint8*)block + blockNeeded * MEM_BLOCK_SIZE);
+    if (remainingBlockSize >= headerBlocks + 1) {
+        block->blockSize = size;
+        auto * newBlock = (FreeBlock*)((uint8*)block + size * MEM_BLOCK_SIZE);
 
         if (prev != nullptr) prev->next = newBlock;
         else headFree = newBlock;
@@ -69,7 +68,7 @@ int MemoryAllocator::free(void *block) {
     // block pokazuje na memoriju koju korisnik moze da koristi, zaglavlje je pre
     auto* newBlock = (FreeBlock*)((uint8*) block - sizeof(FreeBlock));
 
-    if ((void*)newBlock >= HEAP_END_ADDR ||
+    if ((void*)newBlock >= HEAP_END_ADDR  ||
         (void*)newBlock < HEAP_START_ADDR) {
         return -1;
     }
