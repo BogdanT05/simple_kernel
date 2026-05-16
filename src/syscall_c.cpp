@@ -6,16 +6,17 @@
 
 static inline size_t syscall(size_t code, size_t arg1, size_t arg2 = 0, size_t arg3 = 0) {
     size_t ret;
+
     asm volatile(
-      "mv a0, %1\n"
-      "mv a1, %2\n"
-      "mv a2, %3\n"
-      "mv a3, %4\n"
-      "ecall\n"
-      "mv %0, a0\n"
-      : "=r"(ret)
-      : "r"(code), "r"(arg1), "r"(arg2), "r"(arg3)
-      : "a0", "a1", "a2", "a3"
+    "mv a0, %1 \n"
+    "mv a1, %2 \n"
+    "mv a2, %3 \n"
+    "mv a3, %4 \n"
+    "ecall \n"
+    "mv %0, a0 \n"
+    : "=r"(ret)
+    : "r"(code), "r"(arg1), "r"(arg2), "r"(arg3)
+    : "a0", "a1", "a2", "a3", "ra"
     );
 
     return ret;
